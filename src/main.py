@@ -92,6 +92,34 @@ def count_gain(data, decision_column):
     
     return gain_values
 
+def count_gain_ratio(data, decision_column):
+    gain = count_gain(data, decision_column)
+    total_rows = len(data[decision_column])
+    gain_ratio = {}
+
+    for column in data:
+        if column == decision_column:
+            continue
+
+        column_values = data[column]
+        value_counts = {}
+
+        for value in column_values:
+            value_counts[value] = value_counts.get(value, 0) + 1
+
+        split_info = 0.0
+        for count in value_counts.values():
+            prob = count / total_rows
+            if prob > 0:
+                split_info -= prob * math.log2(prob)
+
+        if split_info == 0:
+            gain_ratio[column] = 0
+        else:
+            gain_ratio[column] = gain[column] / split_info
+
+    return gain_ratio
+
 fpath = '../data/testGielda/gielda.txt'
 
 data = load_file_to_structure(fpath)
@@ -108,3 +136,5 @@ print("\nInfo(X, T):")
 print(count_info_x_t(data, decision_column))
 print("\nGain(X, T):")
 print(count_gain(data, decision_column))
+print("\nGain ratio(X, T):")
+print(count_gain_ratio(data, decision_column))
